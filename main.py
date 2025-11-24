@@ -10,8 +10,8 @@ pygame.display.set_caption("The legend of Mario")
 fondo = pygame.image.load("fondo.png")
 fondo = pygame.transform.scale(fondo, (ANCHO, ALTO))
 
-fuente = pygame.font.SysFont("Comic Sans MS", 36)
-fuente_ganar = pygame.font.SysFont("Times New Roman", 72)
+fuente = pygame.font.SysFont("Comic Sans MS", 32)
+fuente_ganar = pygame.font.SysFont("Times New Roman", 60)
 
 NEGRO = (0, 0, 0)
 
