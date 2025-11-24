@@ -1,127 +1,105 @@
-import pygame
-import random
-pygame.init()
+import pygame, random
 
-# --- Configuración de ventana ---
-ANCHO, ALTO = 800, 400
-ventana = pygame.display.set_mode((ANCHO, ALTO))
-pygame.display.set_caption("Mini Mario Bros con XP y Enemigos Dinámicos")
+class Game:
+    def __init__(self, ventana):
+        self.ventana = ventana
+        self.ANCHO, self.ALTO = ventana.get_width(), ventana.get_height()
 
-# --- Colores ---
-AZUL = (100, 149, 237)
-VERDE = (34, 177, 76)
-ROJO = (200, 0, 0)
-BLANCO = (255, 255, 255)
-NEGRO = (0, 0, 0)
+        self.jugador_img = pygame.image.load("link.webp")
+        self.jugador_img = pygame.transform.scale(self.jugador_img, (50, 50))
+        self.jugador = self.jugador_img.get_rect(x=50, y=250)
 
-# --- Jugador ---
-jugador = pygame.Rect(100, 300, 40, 40)
-vel_y = 0
-en_suelo = False
+        self.vel_y = 0
+        self.en_suelo = False
+        self.vida = 3
+        self.experiencia = 0
 
-# --- Suelo ---
-suelo = pygame.Rect(0, 360, ANCHO, 40)
+        self.corazon = pygame.image.load("corazon.png")
+        self.corazon = pygame.transform.scale(self.corazon, (25, 25))
 
-# --- Enemigos iniciales ---
-enemigos = []
-for i in range(1):
-    x = random.randint(200, 750)
-    enemigo = pygame.Rect(x, 320, 40, 40)
-    enemigos.append(enemigo)
+        self.fondo = pygame.image.load("fondo.png")
+        self.fondo = pygame.transform.scale(self.fondo, (self.ANCHO, self.ALTO))
 
-# --- Físicas ---
-gravedad = 1
-velocidad = 5
-salto = -15
+        self.suelo = pygame.Rect(0, 310, self.ANCHO, 5)
+        self.enemigos = [pygame.Rect(500, 270, 40, 40)]
 
-# --- Experiencia ---
-experiencia = 0
-fuente = pygame.font.Font(None, 36)
-fuente_ganar = pygame.font.Font(None, 72)
+        self.gravedad = 1
+        self.velocidad = 5
+        self.salto = -15
 
-# --- Timers ---
-tiempo_inicial = pygame.time.get_ticks()  # tiempo total del juego
-intervalo_enemigo = 1000  # 10 segundos (en milisegundos)
-ultimo_enemigo = tiempo_inicial  # última vez que apareció un enemigo
+        self.fuente = pygame.font.Font(None, 36)
 
-# --- Juego ---
-reloj = pygame.time.Clock()
-ejecutando = True
-ganado = False
+        self.intervalo = 1000
+        self.ultimo = pygame.time.get_ticks()
 
-while ejecutando:
-    reloj.tick(60)
-    tiempo_actual = pygame.time.get_ticks()
+    # Actualiza lógica y dibuja
+    def actualizar(self):
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            ejecutando = False
-
-    if not ganado:
-        # --- Movimiento del jugador ---
         teclas = pygame.key.get_pressed()
+
+        # Movimiento
         if teclas[pygame.K_LEFT]:
-            jugador.x -= velocidad
+            self.jugador.x -= self.velocidad
         if teclas[pygame.K_RIGHT]:
-            jugador.x += velocidad
-        if teclas[pygame.K_SPACE] and en_suelo:
-            vel_y = salto
-            en_suelo = False
+            self.jugador.x += self.velocidad
+        if teclas[pygame.K_SPACE] and self.en_suelo:
+            self.vel_y = self.salto
+            self.en_suelo = False
 
-        # --- Gravedad ---
-        vel_y += gravedad
-        jugador.y += vel_y
+        # Gravedad
+        self.vel_y += self.gravedad
+        self.jugador.y += self.vel_y
 
-        # --- Colisión con el suelo ---
-        if jugador.colliderect(suelo):
-            jugador.bottom = suelo.top
-            vel_y = 0
-            en_suelo = True
+        # Suelo
+        if self.jugador.colliderect(self.suelo):
+            self.jugador.bottom = self.suelo.top
+            self.vel_y = 0
+            self.en_suelo = True
 
-        # --- Movimiento simple de enemigos ---
-        for enemigo in enemigos:
-            enemigo.x += random.choice([-1, 1])
-            enemigo.x = max(0, min(ANCHO - enemigo.width, enemigo.x))
+        # Movimiento de enemigos
+        for e in self.enemigos:
+            e.x += random.choice([-1, 1])
 
-        # --- Colisión con enemigos ---
-        for enemigo in enemigos[:]:
-            if jugador.colliderect(enemigo):
-                # Si cae sobre el enemigo (parte superior)
-                if vel_y > 0 and jugador.bottom - enemigo.top < 20:
-                    enemigos.remove(enemigo)
-                    experiencia += 1
-                    vel_y = salto / 2  # Rebota
+        # Colisiones
+        for e in self.enemigos[:]:
 
-                    # ✅ Condición de victoria
-                    if experiencia >= 10:
-                        ganado = True
-                else:
-                    print("¡Has perdido!")
-                    ejecutando = False
+            if self.jugador.colliderect(e):
 
-        # --- 👾 Aparición automática de enemigos cada 10 segundos ---
-        if tiempo_actual - ultimo_enemigo >= intervalo_enemigo:
-            x = random.randint(200, 750)
-            nuevo_enemigo = pygame.Rect(x, 320, 40, 40)
-            enemigos.append(nuevo_enemigo)
-            ultimo_enemigo = tiempo_actual  # reiniciar temporizador
+                # Salto sobre enemigo
+                if self.vel_y > 0 and self.jugador.bottom - e.top < 20:
+                    self.enemigos.remove(e)
+                    self.experiencia += 1
+                    self.vel_y = self.salto // 2
 
-    # --- Dibujar ---
-    ventana.fill(AZUL)
-    pygame.draw.rect(ventana, VERDE, suelo)
-    pygame.draw.rect(ventana, BLANCO, jugador)
-    for enemigo in enemigos:
-        pygame.draw.rect(ventana, ROJO, enemigo)
+                    if self.experiencia >= 10:
+                        return "ganaste"
 
-    # Texto de experiencia
-    texto_xp = fuente.render(f"Experiencia: {experiencia}", True, NEGRO)
-    ventana.blit(texto_xp, (10, 10))
+                    continue
 
-    # --- Pantalla de victoria ---
-    if ganado:
-        mensaje = fuente_ganar.render("🎉 ¡HAS GANADO! 🎉", True, NEGRO)
-        ventana.blit(mensaje, (ANCHO//2 - mensaje.get_width()//2, ALTO//2 - 50))
+                # Golpe normal
+                self.vida -= 1
 
-    pygame.display.flip()
+                if self.vida <= 0:
+                    return "perdiste"
 
-pygame.quit()
+        # Spawn enemigo
+        tiempo = pygame.time.get_ticks()
+        if tiempo - self.ultimo >= self.intervalo:
+            self.enemigos.append(pygame.Rect(random.randint(200, 750), 270, 40, 40))
+            self.ultimo = tiempo
+
+        # Dibujar pantalla de juego
+        self.ventana.blit(self.fondo, (0,0))
+        self.ventana.blit(self.jugador_img, self.jugador.topleft)
+
+        for e in self.enemigos:
+            pygame.draw.rect(self.ventana, (200,0,0), e)
+
+        # XP y vida
+        xp = self.fuente.render(f"XP: {self.experiencia}", True, (0,0,0))
+        self.ventana.blit(xp, (10,10))
+
+        for i in range(self.vida):
+            self.ventana.blit(self.corazon, (10 + i*35, 35))
+
+        return None
