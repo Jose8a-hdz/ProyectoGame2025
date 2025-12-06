@@ -22,8 +22,8 @@ BLANCO = (255, 255, 255)
 #  CARGAR MÚSICA DE FONDO
 # ====================================================
 try:
-    pygame.mixer.music.load("audio.mp3")  # audio del fondo del juego
-    pygame.mixer.music.set_volume(0.5)  # Volumen al 50%
+    pygame.mixer.music.load("audio.mp3")  #audio del fondo del juego
+    pygame.mixer.music.set_volume(0.1)  # Volumen al 50%
     pygame.mixer.music.play(-1)  # -1 = repetir infinitamente
 except:
     print("No se pudo cargar la música de fondo")

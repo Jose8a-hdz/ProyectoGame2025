@@ -1,5 +1,5 @@
 import pygame, random
-
+#162
 class Game:
     def __init__(self, ventana):
         self.ventana = ventana
@@ -69,7 +69,7 @@ class Game:
         self.fuente = pygame.font.Font(None, 36)
 
     # ----------------------------------------------------------
-    # FUNCIÓN CORRECTA PARA CREAR BOSS
+    # FUNCIÓN PARA CREAR BOSS
     # ----------------------------------------------------------
     def aparecer_boss(self):
         self.boss = pygame.Rect(700, 250, 130, 120)
@@ -159,7 +159,7 @@ class Game:
                 self.enemigos.remove(e)
                 self.experiencia += 1
 
-                if self.experiencia % 10 == 0 and not self.boss_activo:
+                if self.experiencia % 5 == 0 and not self.boss_activo: #10 para pruebas
                     self.aparecer_boss()
 
                 continue
@@ -173,7 +173,7 @@ class Game:
                     self.experiencia += 1
                     self.vel_y = self.salto // 2
 
-                    if self.experiencia % 10 == 0 and not self.boss_activo:
+                    if self.experiencia % 5 == 0 and not self.boss_activo: #10 para pruebas
                         self.aparecer_boss()
 
                     continue
@@ -266,5 +266,9 @@ class Game:
 
         for i in range(self.vida):
             self.ventana.blit(self.corazon, (10 + i * 35, 35))
+
+        # CONDICIÓN DE VICTORIA: GANAR CUANDO SE ELIMINAN 20 ENEMIGOS
+        if self.experiencia >= 15:
+            return "ganaste"
 
         return None
